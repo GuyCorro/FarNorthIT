@@ -36,4 +36,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
         });
     }
+
+    // Hero background slideshow
+    const bgImages = [
+        'assets/images/2025-05-21.jpg',
+        'assets/images/2025-05-21 (1).jpg',
+        'assets/images/2025-05-21 (2).jpg'
+    ];
+    const heroBg = document.querySelector('.hero-bg-slideshow');
+    if (heroBg) {
+        bgImages.forEach((src, idx) => {
+            const img = document.createElement('img');
+            img.src = src;
+            if (idx === 0) img.classList.add('active');
+            heroBg.appendChild(img);
+        });
+        let current = 0;
+        setInterval(() => {
+            const imgs = heroBg.querySelectorAll('img');
+            imgs[current].classList.remove('active');
+            current = (current + 1) % imgs.length;
+            imgs[current].classList.add('active');
+        }, 5000);
+    }
 }); 

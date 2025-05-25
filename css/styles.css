@@ -94,11 +94,12 @@ nav a:hover {
 }
 
 .hero {
+    position: relative;
+    overflow: hidden;
     background: linear-gradient(120deg, var(--primary-blue) 0%, var(--primary-dark) 100%);
     color: var(--text-light);
     text-align: center;
     padding: 4rem 1rem 3rem 1rem;
-    position: relative;
 }
 .hero h1 {
     font-size: 2.5rem;
@@ -320,6 +321,72 @@ footer {
     display: inline-block;
     margin-right: 1.5rem;
 }
+
+.hero-bg-slideshow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+.hero-bg-slideshow img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+    z-index: 0;
+}
+.hero-bg-slideshow img.active {
+    opacity: 1;
+}
+.hero > *:not(.hero-bg-slideshow) {
+    position: relative;
+    z-index: 1;
+}
+
+.section-feature-img {
+    display: block;
+    width: 100%;
+    max-width: 900px;
+    max-height: 320px;
+    margin: 0 auto 2rem auto;
+    border-radius: 18px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    object-fit: cover;
+    background: #fff;
+}
+.hero-feature-img {
+    max-width: 700px;
+    max-height: 260px;
+}
+.services-feature-img {
+    max-width: 800px;
+    max-height: 220px;
+}
+.about-feature-img {
+    max-width: 600px;
+    max-height: 200px;
+}
+@media (max-width: 900px) {
+    .section-feature-img {
+        max-width: 100%;
+        max-height: 180px;
+    }
+}
+@media (max-width: 700px) {
+    .section-feature-img {
+        max-width: 100%;
+        max-height: 120px;
+        border-radius: 10px;
+    }
+}
+/* Remove old hero-image-gallery styles */
+.hero-image-gallery { display: none !important; }
 
 @media (max-width: 700px) {
     nav ul {
