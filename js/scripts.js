@@ -22,27 +22,52 @@ document.addEventListener('DOMContentLoaded', function() {
                     message: formData.get('message')
                 };
 
-                // Send to backend API
-                const response = await fetch('/api/send-email', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(emailData)
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const result = await response.json();
+                // Try Netlify function first, fallback to EmailJS
+                let success = false;
                 
-                if (result.success) {
+                try {
+                    // Try Netlify function
+                    const response = await fetch('/.netlify/functions/send-email', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(emailData)
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        if (result.success) {
+                            success = true;
+                        }
+                    }
+                } catch (netlifyError) {
+                    console.log('Netlify function not available, trying EmailJS fallback');
+                    
+                    // Fallback to EmailJS
+                    try {
+                        // Initialize EmailJS
+                        emailjs.init('f7_0ydDfbD0xlEesp');
+                        
+                        await emailjs.send('service_y6y7ezr', 'template_abroe0k', {
+                            from_name: emailData.name,
+                            from_email: emailData.contact,
+                            message: `Name: ${emailData.name}\nContact: ${emailData.contact}\nBest Time: ${emailData.time}\nMessage: ${emailData.message}`
+                        });
+                        
+                        success = true;
+                    } catch (emailjsError) {
+                        console.error('EmailJS error:', emailjsError);
+                        throw new Error('Both email services failed');
+                    }
+                }
+                
+                if (success) {
                     formMessage.textContent = 'Thank you for reaching out! We will get back to you soon.';
                     formMessage.style.color = '#4CAF50';
                     form.reset();
                 } else {
-                    throw new Error(result.error || 'Failed to send email');
+                    throw new Error('Failed to send email');
                 }
             } catch (error) {
                 console.error('Email sending error:', error);

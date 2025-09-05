@@ -17,8 +17,17 @@ const clientId = '7b7e6993-f7bd-4d04-b0c4-70f125a9f813';
 const clientSecret = process.env.CLIENT_SECRET; // Set this as environment variable
 const tenantId = process.env.TENANT_ID; // Set this as environment variable
 
+// Debug: Check if environment variables are set
+console.log('Environment check:');
+console.log('CLIENT_SECRET:', clientSecret ? 'Set' : 'Not set');
+console.log('TENANT_ID:', tenantId ? 'Set' : 'Not set');
+
 // Initialize Microsoft Graph client
 function getGraphClient() {
+    if (!clientSecret || !tenantId) {
+        throw new Error('CLIENT_SECRET and TENANT_ID environment variables must be set');
+    }
+    
     const credential = new ClientSecretCredential(tenantId, clientId, clientSecret);
     const authProvider = new TokenCredentialAuthenticationProvider(credential, {
         scopes: ['https://graph.microsoft.com/.default']
@@ -31,16 +40,20 @@ function getGraphClient() {
 
 // API endpoint to send email
 app.post('/api/send-email', async (req, res) => {
+    console.log('Received email request:', req.body);
+    
     try {
         const { name, contact, time, message } = req.body;
         
         if (!name || !contact || !time || !message) {
+            console.log('Missing required fields');
             return res.status(400).json({ 
                 success: false, 
                 error: 'All fields are required' 
             });
         }
 
+        console.log('Attempting to send email...');
         const graphClient = getGraphClient();
         
         const emailBody = {
@@ -70,15 +83,21 @@ app.post('/api/send-email', async (req, res) => {
         };
 
         await graphClient.api('/me/sendMail').post(emailBody);
+        console.log('Email sent successfully');
         
         res.json({ success: true });
     } catch (error) {
         console.error('Error sending email:', error);
         res.status(500).json({ 
             success: false, 
-            error: 'Failed to send email' 
+            error: 'Failed to send email: ' + error.message
         });
     }
+});
+
+// Test endpoint to check if server is running
+app.get('/api/test', (req, res) => {
+    res.json({ message: 'Server is running!' });
 });
 
 // Serve the main page
@@ -88,4 +107,5 @@ app.get('/', (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
+    console.log(`Test the server: http://localhost:${PORT}/api/test`);
 });
